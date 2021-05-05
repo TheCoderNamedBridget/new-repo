@@ -1,13 +1,28 @@
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.PriorityQueue;
+import java.util.Queue;
 
 public class StudentSolver {
 	static boolean testingProgram = false;
 	static boolean testingProgramOld = false;
+	static boolean testingPrint = true;
 	public static ArrayList<ArrayList<Integer>> solve(ArrayList<ArrayList<Integer>> c)
 	{
-		boolean testingPrint = true;
+		if ( testingPrint )
+		{
+			System.out.println("Original Array ");
+			for ( int i = 0; i < c.size(); i ++ )
+			{
+				for ( int j = 0; j < c.get(i).size(); j ++ )
+				{
+					System.out.print( c.get(i).get(j) + " ");
+				}
+				System.out.println();
+			}
+		}
+		
 		HashMap<Integer, Integer> countOfNumAppearances = new HashMap<Integer, Integer>();
 		//counts num times num appears in list
 		for ( int i = 0; i < c.size(); i ++ )
@@ -26,10 +41,11 @@ public class StudentSolver {
 		}
 		
 		
-		HashSet<Integer> numsWithReg = new HashSet<Integer>();
+		HashMap<Integer, Integer> regAssignedToNum = new HashMap<Integer, Integer>();
 		int totalNumRegisters = 0;
 		int unsusedRegisters = 0;
 		int curRegNum = 1;
+		Queue<Integer> queueOfUnusedReg = new PriorityQueue<Integer>();
 		//iterates through creating, reusing, switching registers
 		for ( int i = 0; i < c.size(); i ++ )
 		{
@@ -40,6 +56,7 @@ public class StudentSolver {
 				if ( countOfNumAppearances.get(c.get(i).get(j)) == 1 )
 				{
 					numNumsWithCountOne ++;
+					queueOfUnusedReg.add(c.get(i).get(j));
 				}
 				
 				
@@ -47,15 +64,17 @@ public class StudentSolver {
 				
 				
 				//if no reg and not already in a reg and none of numbers in list count == 1 then make reg
-				if ( !numsWithReg.contains(c.get(i).get(j)) && unsusedRegisters == 0 )
+				if ( regAssignedToNum.get(c.get(i).get(j)) == null && unsusedRegisters == 0 )
 				{
-					numsWithReg.add(c.get(i).get(j));
+					regAssignedToNum.put(c.get(i).get(j), curRegNum);
 					totalNumRegisters++;
+					curRegNum++;
 				}
-				else if ( !numsWithReg.contains(c.get(i).get(j)) && unsusedRegisters != 0 )
+				else if ( regAssignedToNum.get(c.get(i).get(j)) == null && unsusedRegisters != 0 && queueOfUnusedReg.size() != 0)
 				{
-					numsWithReg.add(c.get(i).get(j));
+					regAssignedToNum.put(c.get(i).get(j), queueOfUnusedReg.poll());
 					unsusedRegisters--;
+					curRegNum++;
 					
 				}
 				
@@ -64,12 +83,31 @@ public class StudentSolver {
 			}
 			unsusedRegisters += numNumsWithCountOne;
 		}
-		
-		//delete Total rows - Total registers needed from rows
+		ArrayList<ArrayList<Integer>> reg = new ArrayList<ArrayList<Integer>>();
+		//convert the numbers to their register
 		for ( int i = 0; i < c.size(); i ++ )
 		{
-			
+			ArrayList<Integer> placeholderForRegisters = new ArrayList<Integer>();
+			for ( int j = 0; j < c.get(i).size(); j ++ )
+			{
+				placeholderForRegisters.add(regAssignedToNum.get(c.get(i).get(j)));
+			}
+			reg.add(placeholderForRegisters);
 		}
+		
+		if ( testingPrint )
+		{
+			System.out.println("Registers: ");
+			for ( int i = 0; i < reg.size(); i ++ )
+			{
+				for ( int j = 0; j < reg.get(i).size(); j ++ )
+				{
+					System.out.print( reg.get(i).get(j) + " ");
+				}
+				System.out.println();
+			}
+		}
+		
 //		boolean testingPrint = true;
 //		if ( testingPrint )
 //		{
@@ -135,7 +173,7 @@ public class StudentSolver {
 //				
 //			}
 //		}
-		return c;
+		return reg;
 	}
 
 	
